@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+    
+            <a class="navbar-brand" href="#">SkinDisease</a>
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="home()">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="captureImage()">Capture Image</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="upload()">Upload</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light" onclick="logout()">Logout</button>
+                    </li>
+                </ul>
+                
+            </div>
+        </div>
+    </nav>
+
+    <!-- Camera Capture Container -->
+    <div id="cameraContainer" class="container mt-4" style="display: none;">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <video id="cameraPreview" width="100%" autoplay></video>
+                <div id="cameraButtons">
+                    <button id="captureButton" class="btn btn-primary mt-2" onclick="capture()">Capture</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Captured Image Display Container -->
+    <div id="capturedImageContainer" class="container mt-4" style="display: none;">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <img id="capturedImage" width="100%" src="" alt="Captured Image">
+                <div>
+                    <button class="btn btn-primary mt-2 mr-2" onclick="submitCapturedImage()">Submit</button>
+                    <button class="btn btn-secondary mt-2" onclick="retake()">Retake</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Upload Container -->
+    <div id="imageUploadContainer" class="container mt-4" style="display: none;">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <input type="file" id="imageInput" style="display: none;" accept="image/*">
+                <button class="btn btn-primary" onclick="chooseFile()">Choose Photo</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        let stream;
+
+        function home(){
+            document.location.href = 'http://127.0.0.1:5001/index'
+        }
+
+        function analyze(){
+            document.location.href = 'http://127.0.0.1:5001/analyze'
+        }
+
+        function upload(){
+            document.location.href = 'http://127.0.0.1:5001/upload'
+        }
+
+        function logout() {
+            document.location = 'http://127.0.0.1:5001/';
+        }
+
+        function captureImage() {
+            // Show the camera capture container and hide other containers
+            $('#cameraContainer').show();
+            $('#capturedImageContainer').hide();
+            $('#imageUploadContainer').hide();
+
+            // Access the user's camera
+            navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(str) {
+                stream = str;
+                // Display the camera stream in a video element
+                var video = document.getElementById('cameraPreview');
+                video.srcObject = stream;
+                video.play();
+            })
+            .catch(function(error) {
+                console.error('Error accessing camera:', error);
+            });
+        }
+
+        function capture() {
+    // Pause the camera stream
+            var video = document.getElementById('cameraPreview');
+            video.pause();
+
+            // Convert the captured frame to an image
+            var canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            var context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert the image to a data URL
+            var imageDataUrl = canvas.toDataURL('image/png');
+
+            // Convert data URL to Image object
+            var img = new Image();
+            img.onload = function() {
+                // Create a new canvas with RGB format
+                var rgbCanvas = document.createElement('canvas');
+                rgbCanvas.width = img.width;
+                rgbCanvas.height = img.height;
+                var rgbContext = rgbCanvas.getContext('2d');
+                rgbContext.drawImage(img, 0, 0);
+
+                // Get the data URL of the RGB image
+                var rgbImageDataUrl = rgbCanvas.toDataURL('image/png');
+
+                // Display the captured image
+                var capturedImage = document.getElementById('capturedImage');
+                capturedImage.src = rgbImageDataUrl;
+
+                // Show the captured image container
+                $('#capturedImageContainer').show();
+                $('#cameraContainer').hide();
+                $('#cameraButtons').hide();
+            };
+            img.src = imageDataUrl;
+        }
+
+        function submitCapturedImage() {
+            // Get the captured image data URL
+            var capturedImage = document.getElementById('capturedImage');
+            var imageDataUrl = capturedImage.src;
+
+            // Send the captured image to Flask using AJAX
+            $.ajax({
+                url: 'http://127.0.0.1:5001/predict2',
+                type: 'POST',
+                data: { image: imageDataUrl },
+                success: function(response) {
+                    // Handle the response from Flask
+                    console.log('Prediction result:', response.predicted_class);
+                    alert(response.predicted_class);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+        function retake() {
+            // Stop the camera stream
+            window.document.location.href = 'http://127.0.0.1:5001/analyze'
+        }
+
+        function chooseFile() {
+            // Show the image upload container and hide other containers
+            $('#imageUploadContainer').show();
+            $('#cameraContainer').hide();
+            $('#capturedImageContainer').hide();
+        }
+    </script>
+</body>
+</html>

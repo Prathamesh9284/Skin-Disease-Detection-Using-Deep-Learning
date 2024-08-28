@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+    
+            <a class="navbar-brand" href="#">SkinDisease</a>
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="add()">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="analyze()">Click</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="upload()">Upload</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light" onclick="logout()">Logout</button>
+                    </li>
+                </ul>
+                
+            </div>
+        </div>
+    </nav>
+
+
+    <div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="{{ url_for('static', filename='images/sd1.jpg') }}" class="d-block w-100" alt="...">
+                <div class="carousel-caption d-none d-md-block">
+                </div>
+            </div>
+            <!-- <div class="carousel-item">
+                <img src="{{ url_for('static', filename='images/sd2.png') }}" class="d-block w-100" alt="...">
+                <div class="carousel-caption d-none d-md-block">
+                </div>
+            </div> -->
+            <div class="carousel-item">
+                <img src="{{ url_for('static', filename='images/sd3.png') }}" class="d-block w-100" alt="...">
+                <div class="carousel-caption d-none d-md-block">
+                </div>
+            </div>
+            <!-- Add more carousel items as needed -->
+        </div>
+    </div>
+    
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+
+        function analyze(){
+            document.location.href = 'http://127.0.0.1:5001/analyze'
+        }
+        function logout() {
+            document.location = 'http://127.0.0.1:5001/';
+        }
+        function upload(){
+            document.location.href = 'http://127.0.0.1:5001/upload'
+        }
+    </script>
+</body>
+</html>
